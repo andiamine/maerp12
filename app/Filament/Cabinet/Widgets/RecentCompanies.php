@@ -9,6 +9,7 @@ use App\Models\Company;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Support\Enums\FontWeight;
 use Filament\Facades\Filament;
+use App\Filament\Cabinet\Resources\CompanyResource;
 
 class RecentCompanies extends BaseWidget
 {
@@ -22,7 +23,8 @@ class RecentCompanies extends BaseWidget
 
         return $table
             ->query(
-                $cabinet ? $cabinet->companies()
+                $cabinet ? Company::query()
+                    ->where('cabinet_id', $cabinet->id)
                     ->orderBy('created_at', 'desc')
                     ->limit(5) : Company::query()->whereRaw('1 = 0')
             )
@@ -59,7 +61,9 @@ class RecentCompanies extends BaseWidget
                 Tables\Actions\Action::make('view')
                     ->label('Voir')
                     ->icon('heroicon-m-eye')
-                    ->url(fn ($record) => route('filament.cabinet.resources.companies.view', $record))
+                    ->url(fn (Company $record): string =>
+                    CompanyResource::getUrl('view', ['record' => $record])
+                    )
                     ->openUrlInNewTab(),
             ]);
     }
