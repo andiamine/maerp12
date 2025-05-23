@@ -18,6 +18,9 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Filament\Navigation\NavigationGroup;
+use Filament\Navigation\NavigationItem;
+use Filament\Navigation\MenuItem;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -26,11 +29,14 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->id('admin')
             ->path('/admin')
+            ->login()
             ->colors([
                 'primary' => Color::Blue,
                 'success' => Color::Green,
                 'warning' => Color::Amber,
                 'danger' => Color::Red,
+                'gray' => Color::Gray,
+                'info' => Color::Sky,
             ])
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\\Filament\\Admin\\Resources')
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\\Filament\\Admin\\Pages')
@@ -56,25 +62,61 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->brandName('Comptabilité Maroc - Admin')
-            ->brandLogo(asset('images/logo.png'))
+            ->brandName('MAERP')
+            // ->brandLogo(asset('images/logo.png'))
             ->favicon(asset('images/favicon.ico'))
             ->navigationGroups([
-                'Gestion des Cabinets' => [
-                    'sort' => 1,
-                    'icon' => 'heroicon-o-building-office',
-                ],
-                'Gestion des Utilisateurs' => [
-                    'sort' => 2,
-                    'icon' => 'heroicon-o-users',
-                ],
-                'Système' => [
-                    'sort' => 3,
-                    'icon' => 'heroicon-o-cog-6-tooth',
-                ],
+                NavigationGroup::make()
+                    ->label('Gestion des Cabinets')
+                    ->icon('heroicon-o-building-office')
+                    ->collapsed(false),
+                NavigationGroup::make()
+                    ->label('Gestion des Utilisateurs')
+                    ->icon('heroicon-o-users')
+                    ->collapsed(false),
+                NavigationGroup::make()
+                    ->label('Rapports et Analyses')
+                    ->icon('heroicon-o-chart-bar')
+                    ->collapsed(true),
+                NavigationGroup::make()
+                    ->label('Configuration Système')
+                    ->icon('heroicon-o-cog-6-tooth')
+                    ->collapsed(true),
+            ])
+            ->navigationItems([
+                NavigationItem::make('Documentation')
+                    ->url('https://filamentphp.com/docs', shouldOpenInNewTab: true)
+                    ->icon('heroicon-o-document-text')
+                    ->group('Configuration Système')
+                    ->sort(99),
+                NavigationItem::make('Support Technique')
+                    ->url('mailto:support@comptabilite-maroc.ma')
+                    ->icon('heroicon-o-lifebuoy')
+                    ->group('Configuration Système')
+                    ->sort(98),
+            ])
+            ->userMenuItems([
+                'profile' => MenuItem::make()
+                    ->label('Mon Profil')
+                    ->url(function (): string {
+                        return route('filament.admin.resources.users.edit', auth()->user());
+                    })
+                    ->icon('heroicon-m-user-circle'),
+                'settings' => MenuItem::make()
+                    ->label('Paramètres')
+                    ->url('#')
+                    ->icon('heroicon-m-cog-6-tooth'),
             ])
             ->sidebarCollapsibleOnDesktop()
+            ->sidebarWidth('16rem')
             ->maxContentWidth('full')
-            ->spa();
+            ->topNavigation(false)
+            ->breadcrumbs(true)
+            ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
+            ->globalSearchFieldKeyBindingSuffix()
+            ->databaseNotifications()
+            ->databaseNotificationsPolling('30s')
+            ->spa(false) // Pas de SPA pour éviter les problèmes avec Livewire
+            ->unsavedChangesAlerts();
     }
 }
