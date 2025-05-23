@@ -1,5 +1,5 @@
 <?php
-// app/Models/Cabinet.php
+// app/Models/Cabinet.php - Updated for Filament tenancy
 
 namespace App\Models;
 
@@ -8,12 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Filament\Models\Contracts\FilamentUser;
-use Filament\Models\Contracts\HasTenants;
-use Filament\Panel;
-use Illuminate\Support\Collection;
+use Filament\Models\Contracts\HasName;
+use Filament\Models\Contracts\HasAvatar;
 
-class Cabinet extends Model
+class Cabinet extends Model implements HasName, HasAvatar
 {
     use HasFactory;
 
@@ -52,6 +50,20 @@ class Cabinet extends Model
         'parametres' => 'array'
     ];
 
+    // Filament HasName implementation
+    public function getFilamentName(): string
+    {
+        return $this->nom;
+    }
+
+    // Filament HasAvatar implementation
+    public function getFilamentAvatarUrl(): ?string
+    {
+        // You can return a logo URL if you have one
+        return null;
+    }
+
+    // Relationships
     public function companies(): HasMany
     {
         return $this->hasMany(Company::class);
@@ -62,6 +74,12 @@ class Cabinet extends Model
         return $this->hasMany(User::class);
     }
 
+    public function companyCreationTasks(): HasMany
+    {
+        return $this->hasMany(CompanyCreationTask::class);
+    }
+
+    // Business logic methods
     public function isActive(): bool
     {
         return $this->statut === 'actif' &&
@@ -86,5 +104,29 @@ class Cabinet extends Model
             'inactif' => 'danger',
             default => 'gray'
         };
+    }
+
+    public function getDaysUntilExpirationAttribute(): ?int
+    {
+        if (!$this->date_expiration) {
+            return null;
+        }
+
+        return now()->diffInDays($this->date_expiration, false);
+    }
+
+    public function isExpired(): bool
+    {
+        return $this->date_expiration && $this->date_expiration->isPast();
+    }
+
+    public function isExpiringSoon(): bool
+    {
+        if (!$this->date_expiration) {
+            return false;
+        }
+
+        $daysUntilExpiration = $this->days_until_expiration;
+        return $daysUntilExpiration !== null && $daysUntilExpiration <= 30 && $daysUntilExpiration > 0;
     }
 }

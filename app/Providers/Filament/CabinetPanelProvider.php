@@ -60,11 +60,18 @@ class CabinetPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->tenant(Cabinet::class, slugAttribute: 'id')
-            ->tenantMenu(false) // Désactiver le menu de changement de tenant car l'utilisateur n'a qu'un seul cabinet
-            ->brandName(function () {
-                return auth()->user()?->cabinet?->nom ?? 'Cabinet';
-            })
+            // Multi-tenancy configuration
+            ->tenant(Cabinet::class)
+            ->tenantRegistration(false) // Users can't create cabinets themselves
+            ->tenantProfile() // Allow cabinet profile editing
+            ->tenantBillingProvider() // If you want to add billing
+            ->tenantMenuItems([
+                MenuItem::make()
+                    ->label('Paramètres du Cabinet')
+                    ->url(fn (): string => route('filament.cabinet.tenant.profile', ['tenant' => Filament::getTenant()]))
+                    ->icon('heroicon-o-cog'),
+            ])
+            ->brandName(fn () => Filament::getTenant()?->nom ?? 'Cabinet')
             ->navigationGroups([
                 NavigationGroup::make()
                     ->label('Gestion')
@@ -84,10 +91,6 @@ class CabinetPanelProvider extends PanelProvider
                     ->label('Mon Profil')
                     ->url('#')
                     ->icon('heroicon-m-user-circle'),
-                MenuItem::make()
-                    ->label('Mon Cabinet')
-                    ->url('#')
-                    ->icon('heroicon-m-building-office'),
             ])
             ->sidebarCollapsibleOnDesktop()
             ->maxContentWidth('full')

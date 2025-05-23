@@ -92,6 +92,18 @@ class CompanyCreationTask extends Model
         return $this->belongsTo(User::class);
     }
 
+    // Filament multi-tenancy methods
+    public function getTenants(Panel $panel): Collection|array
+    {
+        return $this->cabinet ? collect([$this->cabinet]) : collect();
+    }
+
+    public function canAccessTenant(Model $tenant): bool
+    {
+        return $this->cabinet_id === $tenant->id;
+    }
+
+    // All other existing methods remain the same...
     public function getProgressPercentageAttribute(): int
     {
         $totalSteps = 10;
@@ -116,6 +128,7 @@ class CompanyCreationTask extends Model
 
         return round(($completedSteps / count($steps)) * 100);
     }
+
 
     public function getStatusColorAttribute(): string
     {
