@@ -3,7 +3,9 @@
 - software in french, i need just one language for now because for morocco.
 - software specifically for morocco country
 - im using laravel 12 and filament 3, always make sure i'm using this last technologies
+- no need to use livewire or vuejs, just pure filament for now
 
+Here cahiers de chage, that i need to achieve with this software:
 
 Fonctionnalités Complètes - Module Comptabilité Maroc
 🏛️ 1. CONFORMITÉ RÉGLEMENTAIRE MAROCAINE

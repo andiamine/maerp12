@@ -12,7 +12,7 @@ use Carbon\Carbon;
 
 class MonthlyGrowth extends ChartWidget
 {
-    protected static ?string $heading = 'Croissance Mensuelle';
+    protected static ?string $heading = 'Croissance Mensuelle des Sociétés';
     protected static ?int $sort = 3;
     protected int | string | array $columnSpan = 'full';
 
@@ -23,20 +23,8 @@ class MonthlyGrowth extends ChartWidget
             $months->push(Carbon::now()->subMonths($i));
         }
 
-        $cabinetData = $months->map(function ($month) {
-            return Cabinet::whereYear('created_at', $month->year)
-                ->whereMonth('created_at', $month->month)
-                ->count();
-        });
-
         $companyData = $months->map(function ($month) {
             return Company::whereYear('created_at', $month->year)
-                ->whereMonth('created_at', $month->month)
-                ->count();
-        });
-
-        $userData = $months->map(function ($month) {
-            return User::whereYear('created_at', $month->year)
                 ->whereMonth('created_at', $month->month)
                 ->count();
         });
@@ -44,27 +32,11 @@ class MonthlyGrowth extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Cabinets',
-                    'data' => $cabinetData->toArray(),
-                    'borderColor' => 'rgb(59, 130, 246)',
-                    'backgroundColor' => 'rgba(59, 130, 246, 0.1)',
-                    'fill' => false,
-                    'tension' => 0.4,
-                ],
-                [
                     'label' => 'Sociétés',
                     'data' => $companyData->toArray(),
                     'borderColor' => 'rgb(16, 185, 129)',
                     'backgroundColor' => 'rgba(16, 185, 129, 0.1)',
-                    'fill' => false,
-                    'tension' => 0.4,
-                ],
-                [
-                    'label' => 'Utilisateurs',
-                    'data' => $userData->toArray(),
-                    'borderColor' => 'rgb(245, 158, 11)',
-                    'backgroundColor' => 'rgba(245, 158, 11, 0.1)',
-                    'fill' => false,
+                    'fill' => true,
                     'tension' => 0.4,
                 ],
             ],

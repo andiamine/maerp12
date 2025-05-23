@@ -5,9 +5,8 @@ namespace App\Filament\Admin\Pages;
 
 use Filament\Pages\Dashboard as BaseDashboard;
 use App\Filament\Admin\Widgets\StatsOverview;
-use App\Filament\Admin\Widgets\CabinetsByCity;
+use App\Filament\Admin\Widgets\CompaniesByCabinetAndCity;
 use App\Filament\Admin\Widgets\MonthlyGrowth;
-use App\Filament\Admin\Widgets\ExpirationAlerts;
 use App\Filament\Admin\Widgets\SystemStatus;
 
 class Dashboard extends BaseDashboard
@@ -24,9 +23,8 @@ class Dashboard extends BaseDashboard
     public function getWidgets(): array
     {
         return [
-            CabinetsByCity::class,
+            CompaniesByCabinetAndCity::class,
             MonthlyGrowth::class,
-            ExpirationAlerts::class,
             SystemStatus::class,
         ];
     }

@@ -45,8 +45,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\\Filament\\Admin\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                //Widgets\AccountWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -82,18 +81,6 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Configuration Système')
                     ->icon('heroicon-o-cog-6-tooth')
                     ->collapsed(true),
-            ])
-            ->navigationItems([
-                NavigationItem::make('Documentation')
-                    ->url('https://filamentphp.com/docs', shouldOpenInNewTab: true)
-                    ->icon('heroicon-o-document-text')
-                    ->group('Configuration Système')
-                    ->sort(99),
-                NavigationItem::make('Support Technique')
-                    ->url('mailto:support@comptabilite-maroc.ma')
-                    ->icon('heroicon-o-lifebuoy')
-                    ->group('Configuration Système')
-                    ->sort(98),
             ])
             ->userMenuItems([
                 'profile' => MenuItem::make()
