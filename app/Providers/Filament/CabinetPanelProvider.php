@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -63,8 +64,7 @@ class CabinetPanelProvider extends PanelProvider
             // Multi-tenancy configuration
             ->tenant(Cabinet::class)
             ->tenantRegistration(false) // Users can't create cabinets themselves
-            ->tenantProfile() // Allow cabinet profile editing
-            ->tenantBillingProvider() // If you want to add billing
+            ->tenantProfile(\App\Filament\Cabinet\Pages\EditCabinetProfile::class) // Allow cabinet profile editing
             ->tenantMenuItems([
                 MenuItem::make()
                     ->label('Paramètres du Cabinet')

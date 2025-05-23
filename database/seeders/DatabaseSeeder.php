@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             CabinetSeeder::class,
             CompanySeeder::class,
             UserSeeder::class,
+            CompanyCreationTaskSeeder::class,
         ]);
 
         $this->command->info('🎉 Seeding terminé avec succès!');
