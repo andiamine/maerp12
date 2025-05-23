@@ -8,8 +8,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasTenants;
+use Filament\Panel;
+use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Model;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser, HasTenants
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
@@ -104,5 +109,49 @@ class User extends Authenticatable
             'inactif' => 'danger',
             default => 'gray'
         };
+    }
+
+    // Méthodes pour FilamentUser
+    public function canAccessPanel(Panel $panel): bool
+    {
+        // Vérifier l'accès selon le panel
+        if ($panel->getId() === 'admin') {
+            return $this->role_global === 'super_admin';
+        }
+
+        if ($panel->getId() === 'cabinet') {
+            return $this->cabinet_id !== null &&
+                in_array($this->role_global, ['admin_cabinet', 'expert_comptable', 'comptable', 'assistant', 'client']);
+        }
+
+        if ($panel->getId() === 'comptabilite') {
+            return $this->cabinet_id !== null &&
+                in_array($this->role_global, ['expert_comptable', 'comptable', 'assistant']);
+        }
+
+        return false;
+    }
+
+    // Méthodes pour HasTenants (multi-tenancy dans le panel cabinet)
+    public function getTenants(Panel $panel): Collection
+    {
+        // Pour le panel cabinet, retourner le cabinet de l'utilisateur dans une collection
+        if ($panel->getId() === 'cabinet' && $this->cabinet) {
+            return collect([$this->cabinet]);
+        }
+
+        return collect();
+    }
+
+    public function canAccessTenant(Model $tenant): bool
+    {
+        // Vérifier que l'utilisateur peut accéder à ce cabinet
+        return $this->cabinet_id === $tenant->id;
+    }
+
+    public function cabinets(): BelongsToMany
+    {
+        // Relation fictive pour satisfaire l'interface, mais on utilise belongsTo cabinet
+        return $this->belongsToMany(Cabinet::class);
     }
 }

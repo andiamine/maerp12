@@ -17,6 +17,9 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Filament\Navigation\NavigationGroup;
+use Filament\Navigation\MenuItem;
+use App\Models\Cabinet;
 
 class CabinetPanelProvider extends PanelProvider
 {
@@ -25,8 +28,14 @@ class CabinetPanelProvider extends PanelProvider
         return $panel
             ->id('cabinet')
             ->path('cabinet')
+            ->login()
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Blue,
+                'success' => Color::Green,
+                'warning' => Color::Amber,
+                'danger' => Color::Red,
+                'gray' => Color::Gray,
+                'info' => Color::Sky,
             ])
             ->discoverResources(in: app_path('Filament/Cabinet/Resources'), for: 'App\\Filament\\Cabinet\\Resources')
             ->discoverPages(in: app_path('Filament/Cabinet/Pages'), for: 'App\\Filament\\Cabinet\\Pages')
@@ -36,7 +45,6 @@ class CabinetPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Cabinet/Widgets'), for: 'App\\Filament\\Cabinet\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -51,6 +59,40 @@ class CabinetPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->tenant(Cabinet::class, slugAttribute: 'id')
+            ->tenantMenu(false) // Désactiver le menu de changement de tenant car l'utilisateur n'a qu'un seul cabinet
+            ->brandName(function () {
+                return auth()->user()?->cabinet?->nom ?? 'Cabinet';
+            })
+            ->navigationGroups([
+                NavigationGroup::make()
+                    ->label('Gestion')
+                    ->icon('heroicon-o-briefcase')
+                    ->collapsed(false),
+                NavigationGroup::make()
+                    ->label('Utilisateurs')
+                    ->icon('heroicon-o-users')
+                    ->collapsed(false),
+                NavigationGroup::make()
+                    ->label('Rapports')
+                    ->icon('heroicon-o-chart-bar')
+                    ->collapsed(true),
+            ])
+            ->userMenuItems([
+                MenuItem::make()
+                    ->label('Mon Profil')
+                    ->url('#')
+                    ->icon('heroicon-m-user-circle'),
+                MenuItem::make()
+                    ->label('Mon Cabinet')
+                    ->url('#')
+                    ->icon('heroicon-m-building-office'),
+            ])
+            ->sidebarCollapsibleOnDesktop()
+            ->maxContentWidth('full')
+            ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
+            ->databaseNotifications()
+            ->spa(false);
     }
 }
